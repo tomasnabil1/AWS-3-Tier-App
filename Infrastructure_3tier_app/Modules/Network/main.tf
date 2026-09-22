@@ -6,7 +6,7 @@ resource "aws_vpc" "main" {
         Name = "${var.project_name}-vpc"     
     }  
 }
-## public subnet 1
+## public subnet 1 For ALB (Application Load Balancer)
 resource "aws_subnet" "public1" {
    vpc_id                  = aws_vpc.main.id
    availability_zone       = "us-east-1a"
@@ -14,11 +14,11 @@ resource "aws_subnet" "public1" {
    map_public_ip_on_launch = true
 
    tags = {
-        Name = "${var.project_name}-subnet"     
+        Name = "${var.project_name}-subnet1"     
     }
 }
 
-## public subnet 2 
+## public subnet 2 for ALB (Application Load Balancer)
 resource "aws_subnet" "public2" {
   vpc_id                  = aws_vpc.main.id
   availability_zone       = "us-east-1b"
@@ -26,11 +26,77 @@ resource "aws_subnet" "public2" {
   map_public_ip_on_launch = true  
 
   tags = {
-    Name = "${var.project_name}-subnet"
+    Name = "${var.project_name}-subnet2"
   }
 
 }
 
+## private subnet 1 for EC2 instances
+resource "aws_subnet" "private1"{
+    vpc_id                = aws_vpc.main.id
+    availability_zone     = "us-east-1a"
+    cidr_block            = "10.0.3.0/24"
+    tags = {
+        Name = "${var.project_name}-subnet3"
+    }
+    
+}
+
+
+## private subnet 2 for EC2 instances
+resource "aws_subnet" "private2" {
+    vpc_id              = aws_vpc.main.id
+    availability_zone   = "us-east-1b"
+    cidr_block          =  "10.0.4.0/24"
+    tags = {
+        Name = "${var.project_name}-subnet4"
+    }
+}
+    
+## EIP (Elastic IP) for NAT Gateway
+
+resource "aws_eip" "nat" {
+    domain = "vpc"
+
+     tags = {
+    Name = "${var.project_name}-nat-eip"
+  }
+}
+
+
+## NAT Gateway
+resource "aws_nat_gateway" "main" {
+
+    allocation_id  = aws_eip.nat.id
+    subnet_id      = aws_subnet.public1.id
+
+    tags = {
+        Name = "${var.project_name}-nat-gateway"
+    }
+}
+
+## private route table
+
+resource "aws_route_table" "private" {
+     vpc_id  = aws_vpc.main.id
+     route {
+        cidr_block = "0.0.0.0/0"
+        nat_gateway_id = aws_nat_gateway.main.id
+     }
+}
+
+## route table association private subnet 1
+
+resource "aws_route_table_association" "private1" {
+    subnet_id        = aws_subnet.private1.id
+    route_table_id   = aws_route_table.private.id
+}
+
+## route table association private subnet 2
+resource "aws_route_table_association" "private2" {
+    subnet_id        = aws_subnet.private2.id
+    route_table_id   = aws_route_table.private.id
+}
 
 ## internet gateway
 resource "aws_internet_gateway" "main" {
@@ -59,13 +125,13 @@ resource "aws_route_table" "main" {
 
 ## route table association public subnet 1
 
-resource "aws_route_table_association" "main" {
+resource "aws_route_table_association" "public1" {
   subnet_id      = aws_subnet.public1.id
   route_table_id = aws_route_table.main.id
 }
 
 ## route table association public subnet 2
-resource "aws_route_table_association" "main2" {
+resource "aws_route_table_association" "public2" {
   subnet_id      = aws_subnet.public2.id
   route_table_id = aws_route_table.main.id
 }
