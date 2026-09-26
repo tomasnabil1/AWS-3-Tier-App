@@ -6,21 +6,7 @@ The project provisions a highly available network architecture across multiple A
 
 ## Architecture
 
-```text
-                         Internet
-                            |
-                            v
-                 Application Load Balancer
-                   /                   \
-                  v                     v
-        Private EC2-1             Private EC2-2
-          Nginx                     Nginx
-                  \                 /
-                   \               /
-                    v             v
-                      MySQL RDS
-                    Private Subnets
-```
+![AWS 3-Tier Architecture](docs/architecture.png)
 
 The infrastructure is distributed across two Availability Zones in `us-east-1`.
 
