@@ -1,6 +1,6 @@
 variable "project_name" {
-    description = "The name of the project"
-    type = string 
+  description = "The name of the project"
+  type        = string
 }
 
 variable "ami_id" {
@@ -8,11 +8,11 @@ variable "ami_id" {
 }
 
 variable "key_id" {
-    type = string 
+  type = string
 }
 
 variable "instance_type" {
-    type = string
+  type = string
 }
 
 variable "private_subnet_ids" {
@@ -21,4 +21,16 @@ variable "private_subnet_ids" {
 
 variable "ec2_sg_id" {
   type = string
+}
+
+variable "vpc_id" {
+  type = string
+}
+
+variable "lb_sg_id" {
+  type = string
+}
+
+variable "public_subnet_ids" {
+  type = list(string)
 }
